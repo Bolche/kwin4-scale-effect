@@ -1,0 +1,20 @@
+[Desktop Entry]
+Name=Scale Window
+Name[pt]=Escalar janela
+Icon=preferences-system-windows-effect-fade
+Comment=Allows you to zoom in windows cannot be resized
+Comment[pt]=Permite que você aumento o zoom de janelas que não podem ser redimensionadas
+
+Type=Service
+X-Plasma-API=javascript
+X-Plasma-MainScript=code/scale.js
+X-KDE-ServiceTypes=KWin/Effect
+X-KDE-PluginInfo-Author=Eduardo Menezes de Morais
+X-KDE-PluginInfo-Email=companheiro.vermelho@gmail.com
+X-KDE-PluginInfo-Name=kwin4_scale_effect
+X-KDE-PluginInfo-Version=0.1
+X-KDE-PluginInfo-Category=Accessibility
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-EnabledByDefault=false
+X-KDE-Ordering=50
