@@ -22,13 +22,13 @@ var roles = {
     //other effects, weird behaviour occurs
     scaleFactorRole: 17,
     scaleEffectRole: 18
-}
+};
 
 var scaleEffect = {
     duration: animationTime(250),
     scaleFactor: 0.25,
     isValidWindow: function (window) {
-        return window.normalWindow && !window.resize && !window.minimized
+        return window.normalWindow && !window.resize && !window.minimized;
     },
     setRoles: function (window, factor, effect) {
         window.setData(roles.scaleFactorRole, factor);
@@ -58,7 +58,7 @@ var scaleEffect = {
             value1: roles.factor,
             value2: roles.factor
         });
-        scaleEffect.setRoles(window, roles.factor + scaleFactor, newEffect;
+        scaleEffect.setRoles(window, roles.factor + scaleFactor, newEffect);
     },
     scaleUp: function () {
         scaleEffect.scaleWindow(effects.activeWindow, scaleEffect.scaleFactor);
@@ -79,7 +79,7 @@ var scaleEffect = {
             value2: roles.factor
         });
         scaleEffect.setRoles(window, 1, null);
-    }
+    },
     init: function () {
         registerShortcut("Increase size", "Magnify the window", "ctrl+meta++", scaleEffect.scaleUp);
         registerShortcut("Decrease size", "De-magnify the window", "ctrl+meta+-", scaleEffect.scaleDown);
