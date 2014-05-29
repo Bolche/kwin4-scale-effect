@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=Scale Window
-Name[pt]=Escalar janela
+Name[pt_BR]=Escalar janela
 Icon=preferences-system-windows-effect-fade
 Comment=Allows you to zoom in windows cannot be resized
-Comment[pt]=Permite que você aumento o zoom de janelas que não podem ser redimensionadas
+Comment[pt_BR]=Permite que você aumento o zoom de janelas que não podem ser redimensionadas
 
 Type=Service
 X-Plasma-API=javascript
@@ -17,4 +17,5 @@ X-KDE-PluginInfo-Category=Accessibility
 X-KDE-PluginInfo-Depends=
 X-KDE-PluginInfo-License=GPL
 X-KDE-PluginInfo-EnabledByDefault=false
-X-KDE-Ordering=50
+X-KDE-Ordering=10
+X-KWin-Exclusive-Category=magnifiers

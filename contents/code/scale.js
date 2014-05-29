@@ -15,29 +15,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 "use strict";
-var roles = {
-    //chosen by fair d20 roll. Guaranteed to be random. ;D
-    //seriously though, these numbers should not be used by any other effect
-    //AFAIK there is no way for me to check this. So it's possible that, with
-    //other effects, weird behaviour occurs
-    scaleFactorRole: 17,
-    scaleEffectRole: 18
-};
 
+/* TODO
+ Map inputs
+ Destroy effects on CloseWindow
+ Reimplement Attributes
+ Change shortcuts
+ Configuration
+*/
 var scaleEffect = {
-    duration: animationTime(250),
-    scaleFactor: 0.25,
+    settings: {
+        duration: animationTime(250),
+        scaleFactor: 0.25
+    },
     isValidWindow: function (window) {
         return window.normalWindow && !window.resize && !window.minimized;
     },
-    setRoles: function (window, factor, effect) {
-        window.setData(roles.scaleFactorRole, factor);
-        window.setData(roles.scaleEffectRole, effect);
+    setAttributes: function (window, factor, effect) {
+        window.scaleFactor = factor;
+        window.scaleEffect = effect;
     },
-    getRoles: function (window) {
-        var factorData = window.getData(roles.scaleFactorRole);
-        var effectData = window.getData(roles.scaleEffectRole);
-        if (factorData == null)
+    getAttributes: function (window) {
+        var factorData = window.scaleFactor;
+        var effectData = window.scaleEffect;
+        if (factorData === null || factorData === undefined)
             factorData = 1;
         return { 
             factor: factorData,
@@ -48,42 +49,46 @@ var scaleEffect = {
         if (!scaleEffect.isValidWindow(window)) {
             return;
         }
-        var roles = scaleEffect.getRoles(window);
-        if (roles.effect !== undefined && roles.effect !== null)
-            effect.cancel(roles.effect); //Cancel old effect
-        var newEffect = effect.set(window, Effect.Scale, scaleEffect.duration, {
-            value1: roles.factor + scaleFactor,
-            value2: roles.factor + scaleFactor
+        var attributes = scaleEffect.getAttributes(window);
+        if (attributes.effect !== undefined && attributes.effect !== null)
+            effect.cancel(attributes.effect); //Cancel old effect
+        var newEffect = effect.set(window, Effect.Scale, scaleEffect.settings.duration, {
+            value1: attributes.factor + scaleFactor,
+            value2: attributes.factor + scaleFactor
         }, {
-            value1: roles.factor,
-            value2: roles.factor
+            value1: attributes.factor,
+            value2: attributes.factor
         });
-        scaleEffect.setRoles(window, roles.factor + scaleFactor, newEffect);
+        scaleEffect.setAttributes(window, attributes.factor + scaleFactor, newEffect);
     },
     scaleUp: function () {
-        scaleEffect.scaleWindow(effects.activeWindow, scaleEffect.scaleFactor);
+        print("Scalling window up");
+        scaleEffect.scaleWindow(effects.activeWindow, scaleEffect.settings.scaleFactor);
     },
     scaleDown: function () {
-        scaleEffect.scaleWindow(effects.activeWindow, -scaleEffect.scaleFactor);
+        print("Scalling window down");
+        scaleEffect.scaleWindow(effects.activeWindow, -scaleEffect.settings.scaleFactor);
     },
     scaleNormal: function () {
+        print("Resetting window");
         var window = effects.activeWindow;
-        var roles = scaleEffect.getRoles(window);
-        if (roles.effect !== undefined && roles.effect !== null)
-            effect.cancel(roles.effect); //Cancel old effect
-        effect.animate(window, Effect.Scale, scaleEffect.duration, {
+        var attributes = scaleEffect.getAttributes(window);
+        if (attributes.effect !== undefined && attributes.effect !== null)
+            effect.cancel(attributes.effect); //Cancel old effect
+        effect.animate(window, Effect.Scale, scaleEffect.settings.duration, {
             value1: 1,
             value2: 1
         }, {
-            value1: roles.factor,
-            value2: roles.factor
+            value1: attributes.factor,
+            value2: attributes.factor
         });
-        scaleEffect.setRoles(window, 1, null);
+        scaleEffect.setAttributes(window, 1, null);
     },
     init: function () {
-        registerShortcut("Increase size", "Magnify the window", "ctrl+meta++", scaleEffect.scaleUp);
-        registerShortcut("Decrease size", "De-magnify the window", "ctrl+meta+-", scaleEffect.scaleDown);
-        registerShortcut("Reset size", "Reset the window's scale", "ctrl+meta+0", scaleEffect.scaleNormal);
+        print("Setting up shortcuts");
+        registerShortcut("resscale", "Reset the window's scale", "Meta+0", scaleEffect.scaleNormal);
+        registerShortcut("decscale", "De-magnify the window", "Meta+3", scaleEffect.scaleDown);
+        registerShortcut("incscale", "Magnify the window", "Meta+2", scaleEffect.scaleUp);
     }
 };
 scaleEffect.init();
