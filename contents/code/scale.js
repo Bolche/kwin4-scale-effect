@@ -17,11 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "use strict";
 
 /* TODO
- Map inputs
- Destroy effects on CloseWindow
- Reimplement Attributes
  Change shortcuts
+ Map inputs
  Configuration
+ Rename
 */
 var scaleEffect = {
     settings: {
@@ -31,64 +30,66 @@ var scaleEffect = {
     isValidWindow: function (window) {
         return window.normalWindow && !window.resize && !window.minimized;
     },
-    setAttributes: function (window, factor, effect) {
-        window.scaleFactor = factor;
-        window.scaleEffect = effect;
-    },
-    getAttributes: function (window) {
-        var factorData = window.scaleFactor;
-        var effectData = window.scaleEffect;
-        if (factorData === null || factorData === undefined)
-            factorData = 1;
-        return { 
-            factor: factorData,
-            effect: effectData
-        };
-    },
-    scaleWindow: function (window, scaleFactor) {
-        if (!scaleEffect.isValidWindow(window)) {
-            return;
-        }
-        var attributes = scaleEffect.getAttributes(window);
-        if (attributes.effect !== undefined && attributes.effect !== null)
-            effect.cancel(attributes.effect); //Cancel old effect
-        var newEffect = effect.set(window, Effect.Scale, scaleEffect.settings.duration, {
-            value1: attributes.factor + scaleFactor,
-            value2: attributes.factor + scaleFactor
-        }, {
-            value1: attributes.factor,
-            value2: attributes.factor
-        });
-        scaleEffect.setAttributes(window, attributes.factor + scaleFactor, newEffect);
-    },
     scaleUp: function () {
         print("Scalling window up");
-        scaleEffect.scaleWindow(effects.activeWindow, scaleEffect.settings.scaleFactor);
+        var window = effects.activeWindow;
+        if (window.scaleFactor === undefined)
+            window.scaleFactor = 1;
+        window.scaleFactor += scaleEffect.settings.scaleFactor;
+        scaleEffect.cancelAnimations(window);
+        scaleEffect.startAnimation(window);
     },
     scaleDown: function () {
         print("Scalling window down");
-        scaleEffect.scaleWindow(effects.activeWindow, -scaleEffect.settings.scaleFactor);
+        var window = effects.activeWindow;
+        if (window.scaleFactor === undefined)
+            window.scaleFactor = 1;
+        window.scaleFactor -= scaleEffect.settings.scaleFactor;
+        scaleEffect.cancelAnimations(window);
+        scaleEffect.startAnimation(window);
     },
     scaleNormal: function () {
         print("Resetting window");
         var window = effects.activeWindow;
-        var attributes = scaleEffect.getAttributes(window);
-        if (attributes.effect !== undefined && attributes.effect !== null)
-            effect.cancel(attributes.effect); //Cancel old effect
         effect.animate(window, Effect.Scale, scaleEffect.settings.duration, {
             value1: 1,
             value2: 1
-        }, {
-            value1: attributes.factor,
-            value2: attributes.factor
         });
-        scaleEffect.setAttributes(window, 1, null);
+        window.scaleFactor = 1;
+        scaleEffect.cancelAnimations(window);
+    },
+    desktopChanged: function () {
+        var i, windows;
+        windows = effects.stackingOrder;
+        for (i = 0; i < windows.length; i += 1) {
+            scaleEffect.cancelAnimations(windows[i]);
+            scaleEffect.startAnimation(windows[i]);
+        }
+    },
+    cancelAnimations: function (window) {
+        if (window.scaleEffect !== undefined) {
+            cancel(window.scaleEffect);
+            window.scaleEffect = undefined;
+        }
+    },
+    startAnimation: function (window) {
+        if (!scaleEffect.isValidWindow(window)) {
+            return;
+        }
+        window.scaleEffect = effect.set(window, Effect.Scale, scaleEffect.settings.duration, {
+            value1: window.scaleFactor,
+            value2: window.scaleFactor
+        });
     },
     init: function () {
         print("Setting up shortcuts");
-        registerShortcut("resscale", "Reset the window's scale", "Meta+0", scaleEffect.scaleNormal);
-        registerShortcut("decscale", "De-magnify the window", "Meta+3", scaleEffect.scaleDown);
         registerShortcut("incscale", "Magnify the window", "Meta+2", scaleEffect.scaleUp);
+        registerShortcut("decscale", "De-magnify the window", "Meta+3", scaleEffect.scaleDown);
+        registerShortcut("resscale", "Reset the window's scale", "Meta+0", scaleEffect.scaleNormal);
+        effects.windowClosed.connect(scaleEffect.cancelAnimations);
+        effects.desktopPresenceChanged.connect(scaleEffect.cancelAnimations);
+        effects.desktopPresenceChanged.connect(scaleEffect.startAnimation);
+        effects['desktopChanged(int,int)'].connect(scaleEffect.desktopChanged);
     }
 };
 scaleEffect.init();
